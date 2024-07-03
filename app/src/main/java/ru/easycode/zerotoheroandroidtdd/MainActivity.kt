@@ -10,6 +10,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var countTextView: TextView
     lateinit var incrementButton: Button
 
+    private var uiState: UiState = UiState.Base("0")
     private val count: Count = Count.Base(step = 2, max = 4)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,20 +21,19 @@ class MainActivity : AppCompatActivity() {
         incrementButton = findViewById(R.id.incrementButton)
 
         incrementButton.setOnClickListener {
-            val state = count.increment(countTextView.text.toString())
-            state.apply(countTextView, incrementButton)
+            uiState = count.increment(countTextView.text.toString())
+            uiState.apply(countTextView, incrementButton)
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putBoolean("button", incrementButton.isEnabled)
-        outState.putString("count", countTextView.text.toString())
+        outState.putSerializable("ui", uiState)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        incrementButton.isEnabled = savedInstanceState.getBoolean("button")
-        countTextView.text = savedInstanceState.getString("count")
+        uiState = savedInstanceState.getSerializable("ui") as UiState
+        uiState.apply(countTextView, incrementButton)
     }
 }
